@@ -24,7 +24,6 @@ First, you have to create a master key using AWS IAM and give yourself permissio
 
 ```
 cat app-config.yml | sm encrypt --env aws --region us-east-1 --master arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf	> app-config.sm
-
 cat app-config.sm | sm decrypt
 ```
 
