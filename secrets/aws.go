@@ -3,6 +3,7 @@ package secrets
 import (
 	"sync"
 
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/pkg/errors"
 
@@ -44,7 +45,15 @@ func (s *AwsKeyService) setup() error {
 	defer s.lock.Unlock()
 
 	if s.service == nil || s.creds == nil || s.creds.IsExpired() {
-		s.creds = ec2rolecreds.NewCredentials(awsSession(s.region))
+		s.creds = credentials.NewChainCredentials(
+			[]credentials.Provider{
+				&credentials.EnvProvider{},
+				&credentials.SharedCredentialsProvider{},
+				&ec2rolecreds.EC2RoleProvider{
+					Client: ec2metadata.New(awsSession(s.region)),
+				},
+			})
+
 		sess := session.New(&aws.Config{
 			Credentials: s.creds,
 			Region:      &s.region,
