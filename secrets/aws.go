@@ -68,7 +68,7 @@ func (s *AwsKeyService) setup() error {
 // GenerateKey generates a brand new ServerKey.
 func (s *AwsKeyService) GenerateKey(kid string) (*EncryptionKey, error) {
 	if err := s.setup(); err != nil {
-		return nil, errors.Wrapf(err, "AwsKeyService.GenerateKey failed to setup")
+		return nil, errors.Wrapf(err, "failed to setup")
 	}
 
 	input := &kms.GenerateDataKeyInput{
@@ -80,11 +80,11 @@ func (s *AwsKeyService) GenerateKey(kid string) (*EncryptionKey, error) {
 
 	out, err := s.service.GenerateDataKey(input)
 	if err != nil {
-		return nil, errors.Wrapf(err, "AwsKeyService.GenerateKey failed to GenerateDataKey")
+		return nil, errors.Wrapf(err, "failed to GenerateDataKey")
 	}
 
 	result := &EncryptionKey{
-		KID:    *out.KeyId,
+		KID:    kid,
 		Enc:    A256GCM,
 		RawKey: out.Plaintext,
 		EncKey: base64.RawURLEncoding.EncodeToString(out.CiphertextBlob),
