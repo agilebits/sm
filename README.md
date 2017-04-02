@@ -23,14 +23,35 @@ On the first run, the utility will generate a new master key and store it in `~/
 First, you have to create a master key using AWS IAM and give yourself permissions to use this key for encryption and decryption. 
 
 ```
+export AWS_REGION='us-east-1'
+export KMS_KEY_ID='arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf'
+
 cat app-config.yml | sm encrypt \
 	--env aws \
-	--region us-east-1 \
-	--master arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf \
+	--region $AWS_REGION \
+	--master $KMS_KEY_ID \
 	> app-config.sm
-	
+
 cat app-config.sm | sm decrypt
 ```
+
+## Use jq to validate JSON files
+
+For example:
+```
+export AWS_REGION=us-east-1
+export KMS_KEY_ID=alias/YOUR-KEY-ALIAS
+
+jq --compact-output . < config.json | sm encrypt \
+        --env aws \
+        --region $AWS_REGION \
+        --master $KMS_KEY_ID \
+        > config.sm
+
+sm decrypt < config.sm | jq
+
+```
+
 
 
 
