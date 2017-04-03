@@ -40,3 +40,27 @@ func TestCanGenerateKey(t *testing.T) {
 		t.Errorf("expect the different RawKey in key1 and key3")
 	}
 }
+
+func TestCanEncryptAndDecrypt(t *testing.T) {
+	svc := NewDevKeyService()
+
+	key, err := svc.GenerateKey("somekey")
+	if err != nil {
+		t.Fatal("failed to generate key:", err)
+	}
+
+	source := "Hello, World!"
+	ciphertext, err := key.Encrypt([]byte(source))
+	if err != nil {
+		t.Fatal("failed to Encrypt:", err)
+	}
+
+	plaintext, err := key.Decrypt(ciphertext)
+	if err != nil {
+		t.Fatal("failed to Decrypt:", err)
+	}
+
+	if string(plaintext) != source {
+		t.Errorf("encrypt/decrypt failed, expected %q but got %q", source, plaintext)
+	}
+}
