@@ -1,6 +1,8 @@
 # sm
 Simple secret management tool for server configuration
 
+[ ![Codeship Status for agilebits/sm](https://app.codeship.com/projects/33899e80-fae5-0134-b168-721cf569a862/status?branch=master)](https://app.codeship.com/projects/211385)
+
 ## How to build
 
 ```
