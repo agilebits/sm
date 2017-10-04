@@ -28,12 +28,26 @@ First, you have to create a master key using AWS IAM and give yourself permissio
 export AWS_REGION='us-east-1'
 export KMS_KEY_ID='arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf'
 
+# encrypt the file and pipe stdout to a file
 cat app-config.yml | sm encrypt \
 	--env aws \
 	--region $AWS_REGION \
 	--master $KMS_KEY_ID \
 	> app-config.sm
 
+# encrypt the file and write the output to a file
+cat app-config.yml | sm encrypt \
+  --env aws \
+  --region $AWS_REGION \
+  --master $KMS_KEY_ID \
+  --out app-config.sm
+
+# encrypt the file using settings from a configuration file
+cat app-config.yml | sm encrypt \
+  --config config.yml
+  --out app-config.sm
+
+# decrypt the file
 cat app-config.sm | sm decrypt
 ```
 

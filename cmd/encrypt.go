@@ -28,7 +28,7 @@ key management system is available.
 
 For example:
 
-  cat app-config.yml | sm encrypt --env aws --region us-east-1 --master arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf	> encrypted-app-config.sm
+  cat app-config.yml | sm encrypt --env aws --region us-east-1 --master arn:aws:kms:us-east-1:123123123123:key/d845cfa3-0719-4631-1d00-10ab63e40ddf > encrypted-app-config.sm
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		reader := bufio.NewReader(os.Stdin)
@@ -50,7 +50,24 @@ For example:
 			log.Fatal("failed to Marshal:", err)
 		}
 
-		fmt.Println(string(buf))
+		out := viper.GetString("out")
+		if out != "" {
+			f, err := os.Create(out)
+			if err != nil {
+				log.Fatal(fmt.Sprintf("failed to open %s for writing", out))
+			}
+			defer f.Close()
+
+			w := bufio.NewWriter(f)
+			_, err = w.WriteString(string(buf))
+			if err != nil {
+				log.Fatal(fmt.Sprintf("failed to write output to %s", out))
+			}
+			w.Flush()
+			fmt.Println(fmt.Sprintf("output written to %s", out))
+		} else {
+			fmt.Println(string(buf))
+		}
 	},
 }
 
@@ -60,7 +77,9 @@ func init() {
 	encryptCmd.Flags().StringP("env", "e", "dev", "Environment type: 'dev' or 'aws")
 	encryptCmd.Flags().StringP("region", "r", "", "AWS Region ('us-east-1')")
 	encryptCmd.Flags().StringP("master", "m", "", "Master key identifier")
+	encryptCmd.Flags().StringP("out", "o", "", "A file to write the output to")
 	viper.BindPFlag("env", encryptCmd.Flags().Lookup("env"))
 	viper.BindPFlag("region", encryptCmd.Flags().Lookup("region"))
 	viper.BindPFlag("master", encryptCmd.Flags().Lookup("master"))
+	viper.BindPFlag("out", encryptCmd.Flags().Lookup("out"))
 }
