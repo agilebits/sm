@@ -10,6 +10,7 @@ import (
 
 	"github.com/agilebits/sm/secrets"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // encryptCmd represents the encrypt command
@@ -36,6 +37,9 @@ For example:
 			log.Fatal("failed to read:", err)
 		}
 
+		env := viper.GetString("env")
+		region := viper.GetString("region")
+		masterKeyID := viper.GetString("master")
 		envelope, err := secrets.EncryptEnvelope(env, region, masterKeyID, message)
 		if err != nil {
 			log.Fatal("failed to encrypt:", err)
@@ -53,7 +57,10 @@ For example:
 func init() {
 	RootCmd.AddCommand(encryptCmd)
 
-	encryptCmd.Flags().StringVarP(&env, "env", "e", "dev", "Environment type: 'dev' or 'aws")
-	encryptCmd.Flags().StringVarP(&region, "region", "r", "", "AWS Region ('us-east-1')")
-	encryptCmd.Flags().StringVarP(&masterKeyID, "master", "m", "", "Master key identifier")
+	encryptCmd.Flags().StringP("env", "e", "dev", "Environment type: 'dev' or 'aws")
+	encryptCmd.Flags().StringP("region", "r", "", "AWS Region ('us-east-1')")
+	encryptCmd.Flags().StringP("master", "m", "", "Master key identifier")
+	viper.BindPFlag("env", encryptCmd.Flags().Lookup("env"))
+	viper.BindPFlag("region", encryptCmd.Flags().Lookup("region"))
+	viper.BindPFlag("master", encryptCmd.Flags().Lookup("master"))
 }
