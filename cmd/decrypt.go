@@ -16,8 +16,8 @@ import (
 var decryptCmd = &cobra.Command{
 	Use:   "decrypt",
 	Short: "Decrypt content using key management system",
-	Long: `This command will decrypt content that was encrypted using encrypt command. 
-	
+	Long: `This command will decrypt content that was encrypted using encrypt command.
+
 It requires access to the same key management system (KMS) that was used for encryption.
 
 For example:
@@ -42,10 +42,28 @@ For example:
 			log.Fatal("failed to DecryptEnvelope:", err)
 		}
 
-		fmt.Println(string(result))
+		if out != "" {
+			f, err := os.Create(out)
+			if err != nil {
+				log.Fatal(fmt.Sprintf("failed to open %s for writing", out))
+			}
+			defer f.Close()
+
+			w := bufio.NewWriter(f)
+			_, err = w.WriteString(string(result))
+			if err != nil {
+				log.Fatal(fmt.Sprintf("failed to write output to %s", out))
+			}
+			w.Flush()
+			fmt.Println(fmt.Sprintf("output written to %s", out))
+		} else {
+			fmt.Println(string(result))
+		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(decryptCmd)
+
+	decryptCmd.Flags().StringVarP(&out, "out", "o", "", "A file to write the output to")
 }

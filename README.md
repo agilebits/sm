@@ -22,7 +22,7 @@ On the first run, the utility will generate a new master key and store it in `~/
 
 ## Encrypt/decrypt data with Amazon Web Service KMS
 
-First, you have to create a master key using AWS IAM and give yourself permissions to use this key for encryption and decryption. 
+First, you have to create a master key using AWS IAM and give yourself permissions to use this key for encryption and decryption.
 
 ```
 export AWS_REGION='us-east-1'
@@ -49,6 +49,9 @@ cat app-config.yml | sm encrypt \
 
 # decrypt the file
 cat app-config.sm | sm decrypt
+
+# decrypt the file and write the output to a file
+cat app-config.sm | sm decrypt --out app-config.yml
 ```
 
 ## Use jq to validate JSON files

@@ -45,6 +45,7 @@ func Execute() {
 var env string
 var region string
 var masterKeyID string
+var out string
 
 func init() {
 	cobra.OnInitialize(initConfig)
