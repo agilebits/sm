@@ -10,6 +10,7 @@ import (
 
 	"github.com/agilebits/sm/secrets"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // decryptCmd represents the decrypt command
@@ -22,18 +23,29 @@ It requires access to the same key management system (KMS) that was used for enc
 
 For example:
 
-  cat encrypted-app-config.sm | sm decrypt > app-config.yml
+	cat encrypted-app-config.sm | sm decrypt > app-config.yml
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		reader := bufio.NewReader(os.Stdin)
-		message, err := ioutil.ReadAll(reader)
-		if err != nil {
-			log.Fatal("failed to read:", err)
+		var message []byte
+		var err error
+		input := viper.GetString("input")
+		fmt.Println(input)
+		if input == "" {
+			reader := bufio.NewReader(os.Stdin)
+			message, err = ioutil.ReadAll(reader)
+			if err != nil {
+				log.Fatal("failed to read:", err)
+			}
+		} else {
+			message, err = ioutil.ReadFile(input)
+			if err != nil {
+				log.Fatal("failed to read:", err)
+			}
 		}
 
 		envelope := &secrets.Envelope{}
-		if err := json.Unmarshal(message, &envelope); err != nil {
+		if err = json.Unmarshal(message, &envelope); err != nil {
 			log.Fatal("failed to Unmarshal:", err)
 		}
 
@@ -65,5 +77,7 @@ For example:
 func init() {
 	RootCmd.AddCommand(decryptCmd)
 
+	decryptCmd.Flags().StringP("input", "i", "", "A file to get input from")
 	decryptCmd.Flags().StringVarP(&out, "out", "o", "", "A file to write the output to")
+	viper.BindPFlag("input", decryptCmd.Flags().Lookup("input"))
 }

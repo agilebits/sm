@@ -47,8 +47,11 @@ cat app-config.yml | sm encrypt \
   --config config.yml
   --out app-config.sm
 
-# decrypt the file
+# decrypt the file specified via stdin
 cat app-config.sm | sm decrypt
+
+# decrypt the file speified via flag
+sm decrypt --input app-config.sm
 
 # decrypt the file and write the output to a file
 cat app-config.sm | sm decrypt --out app-config.yml
