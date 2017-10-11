@@ -74,6 +74,19 @@ sm decrypt < config.sm | jq
 
 ```
 
+## Using with GIT
 
+You can integrate SM with `git diff` by adding the following in your repository's `.gitattributes` file:
 
+```
+*.sm diff=sm
+```
 
+The above change assumes that all encrypted files will have the ending `.sm`. It can be safely committed if that is the case.
+
+Developers will also need to add the following stanza to their `.git/config` file - either globally or on a per-repository basis:
+
+```
+[diff "sm"]
+    textconv = sm decrypt --input
+```
