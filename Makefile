@@ -3,9 +3,19 @@ NAME = sm
 HARDWARE = $(shell uname -m)
 VERSION ?= 0.1.0
 
+GOOS ?= darwin
+
 build:
-	mkdir -p build/linux  && GOOS=linux  go build -a -o build/linux/$(NAME)
-	mkdir -p build/darwin && GOOS=darwin go build -a -o build/darwin/$(NAME)
+	@$(MAKE) build/linux/$(NAME)
+	@$(MAKE) build/darwin/$(NAME)
+
+build/darwin/$(NAME):
+	mkdir -p build/darwin
+	CGO_ENABLED=0 GOOS=darwin go build -a -o build/darwin/$(NAME)
+
+build/linux/$(NAME):
+	mkdir -p build/linux
+	CGO_ENABLED=0 GOOS=linux go build -a -o build/linux/$(NAME)
 
 deps:
 	go get -u github.com/progrium/gh-release/...
@@ -20,4 +30,7 @@ release: build
 clean:
 	rm -rf build/*
 
-.PHONY: build release deps clean
+install:
+	install build/$(GOOS)/sm $(GOPATH)/bin/
+
+.PHONY: build release deps clean install
