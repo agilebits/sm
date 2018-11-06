@@ -36,6 +36,9 @@ cat app-config.yml | sm encrypt \
 	> app-config.sm
 
 # encrypt the file and write the output to a file
+# if you have a `.sm/manifest` file, we will add an
+# unencrypted path to the output file to this file
+# as well as your gitignore
 cat app-config.yml | sm encrypt \
   --env aws \
   --region $AWS_REGION \

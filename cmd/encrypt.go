@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/agilebits/sm/secrets"
 	"github.com/spf13/cobra"
@@ -65,6 +66,22 @@ For example:
 			}
 			w.Flush()
 			fmt.Println(fmt.Sprintf("output written to %s", out))
+
+			manifest := "./.sm/manifest"
+			unencryptedFile := strings.TrimSuffix(out, ".sm")
+			if _, err := os.Stat(manifest); !os.IsNotExist(err) {
+				err = secrets.EnsureInManifest(manifest, unencryptedFile)
+				if err != nil {
+					log.Fatal("failed to update manifest", err)
+				}
+			}
+
+			if _, err := os.Stat("./.gitignore"); !os.IsNotExist(err) {
+				err = secrets.EnsureInManifest("./.gitignore", unencryptedFile)
+				if err != nil {
+					log.Fatal("failed to update gitignore", err)
+				}
+			}
 		} else {
 			fmt.Println(string(buf))
 		}
