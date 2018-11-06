@@ -44,34 +44,38 @@ For example:
 			}
 		}
 
-		envelope := &secrets.Envelope{}
-		if err = json.Unmarshal(message, &envelope); err != nil {
-			log.Fatal("failed to Unmarshal:", err)
-		}
-
-		result, err := secrets.DecryptEnvelope(envelope)
-		if err != nil {
-			log.Fatal("failed to DecryptEnvelope:", err)
-		}
-
-		if out != "" {
-			f, err := os.Create(out)
-			if err != nil {
-				log.Fatal(fmt.Sprintf("failed to open %s for writing", out))
-			}
-			defer f.Close()
-
-			w := bufio.NewWriter(f)
-			_, err = w.WriteString(string(result))
-			if err != nil {
-				log.Fatal(fmt.Sprintf("failed to write output to %s", out))
-			}
-			w.Flush()
-			fmt.Println(fmt.Sprintf("output written to %s", out))
-		} else {
-			fmt.Println(string(result))
-		}
+		decryptSecret(message, out)
 	},
+}
+
+func decryptSecret(message []byte, output string) {
+	envelope := &secrets.Envelope{}
+	if err := json.Unmarshal(message, &envelope); err != nil {
+		log.Fatal("failed to Unmarshal:", err)
+	}
+
+	result, err := secrets.DecryptEnvelope(envelope)
+	if err != nil {
+		log.Fatal("failed to DecryptEnvelope:", err)
+	}
+
+	if output != "" {
+		f, err := os.Create(output)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("failed to open %s for writing", output))
+		}
+		defer f.Close()
+
+		w := bufio.NewWriter(f)
+		_, err = w.WriteString(string(result))
+		if err != nil {
+			log.Fatal(fmt.Sprintf("failed to write output to %s", output))
+		}
+		w.Flush()
+		fmt.Println(fmt.Sprintf("output written to %s", output))
+	} else {
+		fmt.Println(string(result))
+	}
 }
 
 func init() {

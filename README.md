@@ -58,6 +58,9 @@ sm decrypt --input app-config.sm
 
 # decrypt the file and write the output to a file
 cat app-config.sm | sm decrypt --out app-config.yml
+
+# decrypting all files you have specified in your .sm/manifest
+sm decrypt-all
 ```
 
 ## Use jq to validate JSON files
