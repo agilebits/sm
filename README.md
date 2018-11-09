@@ -62,8 +62,13 @@ cat app-config.sm | sm decrypt --out app-config.yml
 # decrypting all files you have specified in your .sm/manifest
 sm decrypt-all
 
+# re-encrypting all files specified in your .sm/manifest that have
+# changed since the last encryption pass
+sm encrypt-all
+
 # shred all decrypted files based on your .sm/manifest
 # ensuring you do not have secrets in plaintext on disk
+sm shred
 ```
 
 ## Use jq to validate JSON files

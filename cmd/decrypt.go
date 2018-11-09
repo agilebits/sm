@@ -44,19 +44,28 @@ For example:
 			}
 		}
 
-		decryptSecret(message, out)
+		decryptSecretAndWrite(message, out)
 	},
 }
 
-func decryptSecret(message []byte, output string) {
+func decryptSecret(message []byte) ([]byte, error) {
 	envelope := &secrets.Envelope{}
 	if err := json.Unmarshal(message, &envelope); err != nil {
-		log.Fatal("failed to Unmarshal:", err)
+		return nil, err
 	}
 
 	result, err := secrets.DecryptEnvelope(envelope)
 	if err != nil {
-		log.Fatal("failed to DecryptEnvelope:", err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func decryptSecretAndWrite(message []byte, output string) {
+	result, err := decryptSecret(message)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	if output != "" {

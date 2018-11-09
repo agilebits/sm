@@ -37,7 +37,7 @@ For example:
 				defer wg.Done()
 				message, err := ioutil.ReadFile(fmt.Sprintf("%s.sm", line))
 				if err == nil {
-					decryptSecret(message, line)
+					decryptSecretAndWrite(message, line)
 				} else {
 					log.Fatal("failed to read:", err)
 				}

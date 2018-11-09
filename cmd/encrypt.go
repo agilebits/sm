@@ -41,51 +41,56 @@ For example:
 		env := viper.GetString("env")
 		region := viper.GetString("region")
 		masterKeyID := viper.GetString("master")
-		envelope, err := secrets.EncryptEnvelope(env, region, masterKeyID, message)
-		if err != nil {
-			log.Fatal("failed to encrypt:", err)
-		}
-
-		buf, err := json.Marshal(envelope)
-		if err != nil {
-			log.Fatal("failed to Marshal:", err)
-		}
-
 		out := viper.GetString("out")
-		if out != "" {
-			f, err := os.Create(out)
-			if err != nil {
-				log.Fatal(fmt.Sprintf("failed to open %s for writing", out))
-			}
-			defer f.Close()
 
-			w := bufio.NewWriter(f)
-			_, err = w.WriteString(string(buf))
-			if err != nil {
-				log.Fatal(fmt.Sprintf("failed to write output to %s", out))
-			}
-			w.Flush()
-			fmt.Println(fmt.Sprintf("output written to %s", out))
-
-			manifest := "./.sm/manifest"
-			unencryptedFile := strings.TrimSuffix(out, ".sm")
-			if _, err := os.Stat(manifest); !os.IsNotExist(err) {
-				err = secrets.EnsureInManifest(manifest, unencryptedFile)
-				if err != nil {
-					log.Fatal("failed to update manifest", err)
-				}
-			}
-
-			if _, err := os.Stat("./.gitignore"); !os.IsNotExist(err) {
-				err = secrets.EnsureInManifest("./.gitignore", unencryptedFile)
-				if err != nil {
-					log.Fatal("failed to update gitignore", err)
-				}
-			}
-		} else {
-			fmt.Println(string(buf))
-		}
+		encryptSecret(env, region, masterKeyID, message, out)
 	},
+}
+
+func encryptSecret(env string, region string, masterKeyID string, message []byte, out string) {
+	envelope, err := secrets.EncryptEnvelope(env, region, masterKeyID, message)
+	if err != nil {
+		log.Fatal("failed to encrypt:", err)
+	}
+
+	buf, err := json.Marshal(envelope)
+	if err != nil {
+		log.Fatal("failed to Marshal:", err)
+	}
+
+	if out != "" {
+		f, err := os.Create(out)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("failed to open %s for writing", out))
+		}
+		defer f.Close()
+
+		w := bufio.NewWriter(f)
+		_, err = w.WriteString(string(buf))
+		if err != nil {
+			log.Fatal(fmt.Sprintf("failed to write output to %s", out))
+		}
+		w.Flush()
+		fmt.Println(fmt.Sprintf("output written to %s", out))
+
+		manifest := "./.sm/manifest"
+		unencryptedFile := strings.TrimSuffix(out, ".sm")
+		if _, err := os.Stat(manifest); !os.IsNotExist(err) {
+			err = secrets.EnsureInManifest(manifest, unencryptedFile)
+			if err != nil {
+				log.Fatal("failed to update manifest", err)
+			}
+		}
+
+		if _, err := os.Stat("./.gitignore"); !os.IsNotExist(err) {
+			err = secrets.EnsureInManifest("./.gitignore", unencryptedFile)
+			if err != nil {
+				log.Fatal("failed to update gitignore", err)
+			}
+		}
+	} else {
+		fmt.Println(string(buf))
+	}
 }
 
 func init() {
