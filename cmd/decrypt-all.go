@@ -75,7 +75,7 @@ func worker(workCh chan string, wg *sync.WaitGroup) {
 			success := false
 			for i := 0; i < 3; i++ {
 				if err = decryptSecretAndWrite(message, file); err != nil {
-					log.Printf("Could not decrypt file %s: %s (Attempt %d/%d, next in 1s)\n", file, err.Error(), i, 3)
+					log.Printf("Could not decrypt file %s: %s (Attempt %d/%d, next attempt in 1s)\n", file, err.Error(), i, 3)
 					time.Sleep(time.Second)
 					continue
 				}
