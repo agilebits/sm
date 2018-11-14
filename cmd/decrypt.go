@@ -62,29 +62,32 @@ func decryptSecret(message []byte) ([]byte, error) {
 	return result, nil
 }
 
-func decryptSecretAndWrite(message []byte, output string) {
+func decryptSecretAndWrite(message []byte, file string) error {
 	result, err := decryptSecret(message)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	if output != "" {
-		f, err := os.Create(output)
-		if err != nil {
-			log.Fatal(fmt.Sprintf("failed to open %s for writing", output))
-		}
-		defer f.Close()
-
-		w := bufio.NewWriter(f)
-		_, err = w.WriteString(string(result))
-		if err != nil {
-			log.Fatal(fmt.Sprintf("failed to write output to %s", output))
-		}
-		w.Flush()
-		fmt.Println(fmt.Sprintf("output written to %s", output))
-	} else {
+	// if no file is provided, output to stdout
+	if file == "" {
 		fmt.Println(string(result))
+		return nil
 	}
+
+	f, err := os.Create(file)
+	if err != nil {
+		return fmt.Errorf("failed to open %s for writing", file)
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	if _, err = w.WriteString(string(result)); err != nil {
+		return fmt.Errorf("failed to write output to %s", file)
+	}
+	w.Flush()
+
+	fmt.Println(fmt.Sprintf("output written to %s", file))
+	return nil
 }
 
 func init() {
