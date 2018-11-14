@@ -60,22 +60,22 @@ func init() {
 func worker(workCh chan string, wg *sync.WaitGroup) {
 	for {
 		select {
-		case line, ok := <-workCh:
+		case file, ok := <-workCh:
 			// channel closed
 			if !ok {
 				return
 			}
 
 			// read up the file from disk
-			message, err := ioutil.ReadFile(fmt.Sprintf("%s.sm", line))
+			message, err := ioutil.ReadFile(fmt.Sprintf("%s.sm", file))
 			if err != nil {
 				log.Fatal("failed to read:", err)
 			}
 
 			success := false
 			for i := 0; i < 3; i++ {
-				if err = decryptSecretAndWrite(message, line); err != nil {
-					log.Printf("Could not decrypt file %s: %s (Attempt %d/%d, next in 1s)\n", line, err.Error(), i, 3)
+				if err = decryptSecretAndWrite(message, file); err != nil {
+					log.Printf("Could not decrypt file %s: %s (Attempt %d/%d, next in 1s)\n", file, err.Error(), i, 3)
 					time.Sleep(time.Second)
 					continue
 				}
@@ -85,7 +85,7 @@ func worker(workCh chan string, wg *sync.WaitGroup) {
 			}
 
 			if !success {
-				log.Fatalf("Could not decrypt file %s: %s", line, err)
+				log.Fatalf("Could not decrypt file %s: %s", file, err)
 			}
 
 			wg.Done()
