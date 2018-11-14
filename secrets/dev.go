@@ -2,17 +2,14 @@ package secrets
 
 import (
 	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/user"
 	"path"
 	"strings"
-
-	"encoding/json"
-
-	"os"
-
-	"encoding/base64"
 
 	"github.com/pkg/errors"
 )

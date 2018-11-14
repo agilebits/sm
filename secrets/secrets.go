@@ -3,6 +3,7 @@ package secrets
 import (
 	"encoding/base64"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -12,6 +13,9 @@ const (
 	envDev = "dev"
 	envAWS = "aws"
 )
+
+var keyCache map[string]KeyService
+var mu sync.Mutex
 
 // EncryptEnvelope will generate a new key and encrypt the message. It returns the Envelope that contains everything that is needed to decrypt the message (if the access to the KeyService is granted).
 func EncryptEnvelope(env, region, masterKeyID string, message []byte) (*Envelope, error) {
@@ -68,6 +72,18 @@ func DecryptEnvelope(envelope *Envelope) ([]byte, error) {
 }
 
 func getKeyService(env, region, masterKeyID string) (KeyService, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	cacheKey := fmt.Sprintf("%s_%s_%s", env, region, masterKeyID)
+	if keyCache == nil {
+		keyCache = make(map[string]KeyService)
+	}
+
+	if ks, ok := keyCache[cacheKey]; ok {
+		return ks, nil
+	}
+
 	var keyService KeyService
 	switch env {
 	case envDev:
@@ -78,5 +94,6 @@ func getKeyService(env, region, masterKeyID string) (KeyService, error) {
 		return nil, fmt.Errorf("unsupported env: %+q", env)
 	}
 
+	keyCache[cacheKey] = keyService
 	return keyService, nil
 }

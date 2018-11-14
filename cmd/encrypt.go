@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/agilebits/sm/secrets"
+	"github.com/josegonzalez/sm/secrets"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -18,12 +18,12 @@ import (
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt",
 	Short: "Encrypt content using key management system",
-	Long: ` 
-	
-Encrypt command is used to encrypt the contents of the standard input and write
-encrypted "envelope" into the standard output. 
+	Long: `
 
-The envelope is a JSON file that contains encrypted data along with the 
+Encrypt command is used to encrypt the contents of the standard input and write
+encrypted "envelope" into the standard output.
+
+The envelope is a JSON file that contains encrypted data along with the
 additional information that is needed to decrypt it back if the access to the
 key management system is available.
 
