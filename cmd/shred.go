@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/josegonzalez/sm/secrets"
+	"github.com/agilebits/sm/secrets"
 	"github.com/spf13/cobra"
 )
 
