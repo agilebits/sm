@@ -69,7 +69,8 @@ func worker(workCh chan string, wg *sync.WaitGroup) {
 			// read up the file from disk
 			message, err := ioutil.ReadFile(fmt.Sprintf("%s.sm", file))
 			if err != nil {
-				log.Fatal("failed to read:", err)
+				log.Printf("failed to read: %s", err.Error())
+				continue
 			}
 
 			success := false
