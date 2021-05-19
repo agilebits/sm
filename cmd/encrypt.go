@@ -9,7 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/josegonzalez/sm/secrets"
+	"sm/secrets"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

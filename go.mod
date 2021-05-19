@@ -1,4 +1,4 @@
-module github.com/josegonzalez/sm
+module sm
 
 go 1.16
 
