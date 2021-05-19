@@ -7,7 +7,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/agilebits/sm/secrets"
+	"github.com/josegonzalez/sm/secrets"
 	"github.com/spf13/cobra"
 )
 

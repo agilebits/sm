@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/agilebits/sm/secrets"
+	"github.com/josegonzalez/sm/secrets"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
