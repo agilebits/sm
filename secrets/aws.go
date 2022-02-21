@@ -1,27 +1,25 @@
 package secrets
 
 import (
+	"context"
 	"encoding/base64"
+	"log"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
+
 	"github.com/pkg/errors"
 )
 
 // AwsKeyService represents connection to Amazon Web Services KMS
 type AwsKeyService struct {
-	lock sync.RWMutex
-
 	region      string
 	masterKeyID string
+	service     *kms.Client
 
-	creds   *credentials.Credentials
-	service *kms.KMS
+	sync.RWMutex
 }
 
 // NewAwsKeyService creates a new AwsKeyService in given AWS region and with the given masterKey identifier.
@@ -32,32 +30,21 @@ func NewAwsKeyService(region string, masterKeyID string) *AwsKeyService {
 	}
 }
 
-func awsSession(region string) *session.Session {
-	return session.New(&aws.Config{
-		Region: aws.String(region),
-	})
+func awsSession(region string) (aws.Config, error) {
+	return config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 }
 
 func (s *AwsKeyService) setup() error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
-	if s.service == nil || s.creds == nil || s.creds.IsExpired() {
-		s.creds = credentials.NewChainCredentials(
-			[]credentials.Provider{
-				&credentials.EnvProvider{},
-				&credentials.SharedCredentialsProvider{},
-				&ec2rolecreds.EC2RoleProvider{
-					Client: ec2metadata.New(awsSession(s.region)),
-				},
-			})
+	if s.service == nil {
+		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(s.region))
+		if err != nil {
+			log.Fatalf("unable to load SDK config, %v", err)
+		}
 
-		sess := session.New(&aws.Config{
-			Credentials: s.creds,
-			Region:      &s.region,
-		})
-
-		s.service = kms.New(sess)
+		s.service = kms.NewFromConfig(cfg)
 	}
 
 	return nil
@@ -70,13 +57,13 @@ func (s *AwsKeyService) GenerateKey(kid string) (*EncryptionKey, error) {
 	}
 
 	input := &kms.GenerateDataKeyInput{
-		EncryptionContext: map[string]*string{"kid": aws.String(kid)},
-		GrantTokens:       []*string{aws.String("Encrypt"), aws.String("Decrypt")},
+		EncryptionContext: map[string]string{"kid": kid},
+		GrantTokens:       []string{"Encrypt", "Decrypt"},
 		KeyId:             aws.String(s.masterKeyID),
-		KeySpec:           aws.String("AES_256"),
+		KeySpec:           "AES_256",
 	}
 
-	out, err := s.service.GenerateDataKey(input)
+	out, err := s.service.GenerateDataKey(context.TODO(), input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to GenerateDataKey")
 	}
@@ -104,11 +91,11 @@ func (s *AwsKeyService) DecryptKey(key *EncryptionKey) error {
 
 	input := &kms.DecryptInput{
 		CiphertextBlob:    ciphertextBlob,
-		EncryptionContext: map[string]*string{"kid": aws.String(key.KID)},
-		GrantTokens:       []*string{aws.String("Encrypt"), aws.String("Decrypt")},
+		EncryptionContext: map[string]string{"kid": key.KID},
+		GrantTokens:       []string{"Encrypt", "Decrypt"},
 	}
 
-	out, err := s.service.Decrypt(input)
+	out, err := s.service.Decrypt(context.TODO(), input)
 	if err != nil {
 		return errors.Wrapf(err, "failed to Decrypt")
 	}
