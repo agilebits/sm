@@ -16,13 +16,13 @@ build/darwin/$(NAME)-amd64:
 	mkdir -p build/darwin
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -asmflags=-trimpath=/src -gcflags=-trimpath=/src \
 										-ldflags "-s -w -X main.Version=$(VERSION)" \
-										-o build/darwin/$(NAME)
+										-o build/darwin/$(NAME)-amd64
 
 build/darwin/$(NAME)-arm64:
 	mkdir -p build/darwin
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -asmflags=-trimpath=/src -gcflags=-trimpath=/src \
 										-ldflags "-s -w -X main.Version=$(VERSION)" \
-										-o build/darwin/$(NAME)
+										-o build/darwin/$(NAME)-arm64
 
 build/linux/$(NAME)-amd64:
 	mkdir -p build/linux
