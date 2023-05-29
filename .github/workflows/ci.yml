@@ -1,0 +1,30 @@
+---
+name: CI
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - 'master'
+      - 'release'
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+
+      steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
+
+      - name: Build
+        run: make build
